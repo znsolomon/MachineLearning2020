@@ -7,19 +7,30 @@ from sklearn.datasets import make_blobs
 from sklearn.preprocessing import StandardScaler
 import matplotlib.pyplot as plt
 
+
 def divide_data(data, labels, size):
-    #Cut down size of data whilst retaining proportions of classes
-    sortedData = np.empty([10, 6000, 784])
-    sortedLabels = np.empty([10, 6000])
+    # Cut down size of data whilst retaining proportions of classes
+    sortedData = np.empty([10, 6000, 784]).astype(int)
+    sortedLabels = np.empty([10, 6000]).astype(int)
+    divData = np.empty([size, 784]).astype(int)
+    divLables = np.empty([size]).astype(int)
     counters = np.zeros(10).astype(int)
-    #Sort data into labels
+    labelSize = int(size / 10)
+    # Sort data into labels
     for i in range(len(data)):
         label = labels[i]
         sortedData[label, counters[label]] = data[i]
         sortedLabels[label, counters[label]] = labels[i]
         counters[label] += 1
-
-
+    # Take 'size' from each label
+    c = 0
+    for i in range(10):
+        for j in range(labelSize):
+            index = np.random.randint(0, 6000)
+            divData[c] = sortedData[i, index]
+            divLables[c] = sortedLabels[i, index]
+            c += 1
+    return divData, divLables
 
 
 def dbscan(trainSet, trainLabels):
@@ -79,8 +90,8 @@ if __name__ == '__main__':
     X_train, y_train = mnist_reader.load_mnist('data/fashion', kind='train')
     X_test, y_test = mnist_reader.load_mnist('data/fashion', kind='t10k')
 
-    divide_data(X_train, y_train, 30000)
+    X_reduced, y_reduced = divide_data(X_train, y_train, 30000)
 
-    #dbscan(X_train, y_train)
+    dbscan(X_reduced, y_reduced)
 
 
