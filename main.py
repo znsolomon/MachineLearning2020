@@ -3,6 +3,7 @@ import numpy as np
 import sklearn
 from sklearn.cluster import DBSCAN
 from sklearn import metrics
+from sklearn import tree
 from sklearn.datasets import make_blobs
 from sklearn.preprocessing import StandardScaler
 import matplotlib.pyplot as plt
@@ -33,6 +34,21 @@ def divide_data(data, labels, size):
     return divData, divLables
 
 
+def decision_tree(trainSet, trainLabels, testSet, testLables):
+    x = trainSet
+    y = trainLabels
+    clf = tree.DecisionTreeClassifier()
+    clf = clf.fit(x, y)
+    predictions = clf.predict(testSet)
+    # Check % of correct predictions
+    accuracy = 0
+    for i in range(len(predictions)):
+        if predictions[i] == testLables[i]:
+            accuracy += 1
+    accuracy = accuracy / len(predictions)
+    return accuracy
+
+
 def dbscan(trainSet, trainLabels):
 
     X = trainSet
@@ -41,7 +57,7 @@ def dbscan(trainSet, trainLabels):
     X = StandardScaler().fit_transform(X)
 
     # Compute DBSCAN
-    db = DBSCAN(eps=0.3, min_samples=10).fit(X)
+    db = DBSCAN(eps=0.5, min_samples=5).fit(X)
     core_samples_mask = np.zeros_like(db.labels_, dtype=bool)
     core_samples_mask[db.core_sample_indices_] = True
     labels = db.labels_
@@ -59,8 +75,8 @@ def dbscan(trainSet, trainLabels):
           % metrics.adjusted_rand_score(labels_true, labels))
     print("Adjusted Mutual Information: %0.3f"
           % metrics.adjusted_mutual_info_score(labels_true, labels))
-    print("Silhouette Coefficient: %0.3f"
-          % metrics.silhouette_score(X, labels))
+    #print("Silhouette Coefficient: %0.3f"
+    #      % metrics.silhouette_score(X, labels))
 
     # Black removed and is used for noise instead.
     unique_labels = set(labels)
@@ -90,8 +106,7 @@ if __name__ == '__main__':
     X_train, y_train = mnist_reader.load_mnist('data/fashion', kind='train')
     X_test, y_test = mnist_reader.load_mnist('data/fashion', kind='t10k')
 
-    X_reduced, y_reduced = divide_data(X_train, y_train, 30000)
+    X_reduced, y_reduced = divide_data(X_train, y_train, 10000)
 
-    dbscan(X_reduced, y_reduced)
-
+    print(decision_tree(X_reduced, y_reduced, X_test, y_test))
 
